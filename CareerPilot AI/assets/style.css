@@ -1,0 +1,499 @@
+/* ============================================
+   CAREERPILOT AI — MODERN BRUTALISM CSS
+   ============================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700;800&display=swap');
+
+/* ---- BASE ---- */
+*, *::before, *::after {
+    box-sizing: border-box;
+}
+
+html, body, [class*="css"] {
+    font-family: 'Space Grotesk', sans-serif !important;
+    background-color: #FFFFFF !important;
+    color: #000000 !important;
+}
+
+/* ---- HIDE STREAMLIT DEFAULTS ---- */
+#MainMenu { visibility: hidden; }
+footer { visibility: hidden; }
+header { visibility: hidden; }
+
+/* ---- MAIN CONTAINER ---- */
+.main .block-container {
+    padding-top: 2rem !important;
+    padding-bottom: 2rem !important;
+    max-width: 1200px !important;
+}
+
+/* ---- HEADINGS ---- */
+h1, .h1 {
+    font-size: 2.8rem !important;
+    font-weight: 800 !important;
+    color: #000000 !important;
+    line-height: 1.1 !important;
+    letter-spacing: -0.02em !important;
+}
+
+h2, .h2 {
+    font-size: 2rem !important;
+    font-weight: 700 !important;
+    color: #000000 !important;
+}
+
+h3, .h3 {
+    font-size: 1.4rem !important;
+    font-weight: 700 !important;
+    color: #000000 !important;
+}
+
+/* ---- BRUTALISM CARD ---- */
+.brut-card {
+    border: 3px solid #000000 !important;
+    box-shadow: 5px 5px 0px #000000 !important;
+    border-radius: 0px !important;
+    background: #FFFFFF !important;
+    padding: 1.5rem !important;
+    margin-bottom: 1rem !important;
+    transition: box-shadow 0.1s ease, transform 0.1s ease !important;
+}
+
+.brut-card:hover {
+    box-shadow: 8px 8px 0px #000000 !important;
+    transform: translate(-2px, -2px) !important;
+}
+
+/* ---- METRIC CARDS ---- */
+.metric-card {
+    background: #F0F4FF !important;
+    border: 3px solid #0066FF !important;
+    box-shadow: 4px 4px 0px #0066FF !important;
+    border-radius: 0px !important;
+    padding: 1.2rem !important;
+    text-align: center !important;
+}
+
+.metric-card .metric-value {
+    font-size: 2.4rem !important;
+    font-weight: 800 !important;
+    color: #0066FF !important;
+}
+
+.metric-card .metric-label {
+    font-size: 0.85rem !important;
+    font-weight: 600 !important;
+    color: #000000 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.05em !important;
+}
+
+/* ---- SCORE BADGES ---- */
+.score-badge {
+    background: #0066FF !important;
+    color: #FFFFFF !important;
+    font-size: 2rem !important;
+    font-weight: 800 !important;
+    border: 3px solid #000000 !important;
+    padding: 0.5rem 1.5rem !important;
+    display: inline-block !important;
+    box-shadow: 4px 4px 0px #000000 !important;
+}
+
+.score-badge-success {
+    background: #00A651 !important;
+    color: #FFFFFF !important;
+    font-size: 2rem !important;
+    font-weight: 800 !important;
+    border: 3px solid #000000 !important;
+    padding: 0.5rem 1.5rem !important;
+    display: inline-block !important;
+    box-shadow: 4px 4px 0px #000000 !important;
+}
+
+.score-badge-warning {
+    background: #FF9500 !important;
+    color: #FFFFFF !important;
+    font-size: 2rem !important;
+    font-weight: 800 !important;
+    border: 3px solid #000000 !important;
+    padding: 0.5rem 1.5rem !important;
+    display: inline-block !important;
+    box-shadow: 4px 4px 0px #000000 !important;
+}
+
+.score-badge-error {
+    background: #FF3B30 !important;
+    color: #FFFFFF !important;
+    font-size: 2rem !important;
+    font-weight: 800 !important;
+    border: 3px solid #000000 !important;
+    padding: 0.5rem 1.5rem !important;
+    display: inline-block !important;
+    box-shadow: 4px 4px 0px #000000 !important;
+}
+
+/* ---- BUTTONS ---- */
+.stButton > button {
+    background: #0066FF !important;
+    color: #FFFFFF !important;
+    border: 3px solid #000000 !important;
+    box-shadow: 4px 4px 0px #000000 !important;
+    font-weight: 700 !important;
+    border-radius: 0px !important;
+    padding: 0.6rem 1.4rem !important;
+    font-family: 'Space Grotesk', sans-serif !important;
+    font-size: 1rem !important;
+    transition: all 0.1s ease !important;
+    width: auto !important;
+}
+
+.stButton > button:hover {
+    box-shadow: 2px 2px 0px #000000 !important;
+    transform: translate(2px, 2px) !important;
+    background: #0055DD !important;
+}
+
+.stButton > button:active {
+    box-shadow: 0px 0px 0px #000000 !important;
+    transform: translate(4px, 4px) !important;
+}
+
+/* Secondary button via markdown */
+.sec-btn {
+    background: #FFFFFF !important;
+    color: #000000 !important;
+    border: 3px solid #000000 !important;
+    box-shadow: 4px 4px 0px #000000 !important;
+    font-weight: 700 !important;
+    border-radius: 0px !important;
+    padding: 0.6rem 1.4rem !important;
+    display: inline-block !important;
+    cursor: pointer !important;
+    font-family: 'Space Grotesk', sans-serif !important;
+    font-size: 1rem !important;
+    text-decoration: none !important;
+    transition: all 0.1s ease !important;
+}
+
+/* ---- SIDEBAR ---- */
+[data-testid="stSidebar"] {
+    background-color: #000000 !important;
+    border-right: 3px solid #0066FF !important;
+}
+
+[data-testid="stSidebar"] * {
+    color: #FFFFFF !important;
+    font-family: 'Space Grotesk', sans-serif !important;
+}
+
+[data-testid="stSidebar"] .stRadio label {
+    color: #FFFFFF !important;
+    font-weight: 600 !important;
+    padding: 0.4rem 0.6rem !important;
+    border-left: 4px solid transparent !important;
+    transition: all 0.15s ease !important;
+    display: block !important;
+    cursor: pointer !important;
+}
+
+[data-testid="stSidebar"] .stRadio label:hover {
+    border-left: 4px solid #0066FF !important;
+    background: #111111 !important;
+    padding-left: 1rem !important;
+}
+
+[data-testid="stSidebar"] h1,
+[data-testid="stSidebar"] h2,
+[data-testid="stSidebar"] h3,
+[data-testid="stSidebar"] p,
+[data-testid="stSidebar"] span {
+    color: #FFFFFF !important;
+}
+
+[data-testid="stSidebar"] .stSelectbox label,
+[data-testid="stSidebar"] .stSelectbox div {
+    color: #FFFFFF !important;
+}
+
+/* ---- INPUTS ---- */
+.stTextInput > div > div > input,
+.stTextArea > div > div > textarea,
+.stSelectbox > div > div,
+.stDateInput > div > div > input {
+    border: 2px solid #000000 !important;
+    border-radius: 0px !important;
+    font-family: 'Space Grotesk', sans-serif !important;
+    font-size: 1rem !important;
+    background: #FFFFFF !important;
+}
+
+.stTextInput > div > div > input:focus,
+.stTextArea > div > div > textarea:focus {
+    border: 2px solid #0066FF !important;
+    box-shadow: 3px 3px 0px #0066FF !important;
+    outline: none !important;
+}
+
+/* ---- SLIDER ---- */
+.stSlider > div {
+    font-family: 'Space Grotesk', sans-serif !important;
+}
+
+/* ---- ALERTS ---- */
+.stSuccess {
+    border: 2px solid #00A651 !important;
+    border-left: 6px solid #00A651 !important;
+    border-radius: 0px !important;
+    background: #F0FFF6 !important;
+}
+
+.stWarning {
+    border: 2px solid #FF9500 !important;
+    border-left: 6px solid #FF9500 !important;
+    border-radius: 0px !important;
+    background: #FFF8F0 !important;
+}
+
+.stError {
+    border: 2px solid #FF3B30 !important;
+    border-left: 6px solid #FF3B30 !important;
+    border-radius: 0px !important;
+    background: #FFF0F0 !important;
+}
+
+.stInfo {
+    border: 2px solid #0066FF !important;
+    border-left: 6px solid #0066FF !important;
+    border-radius: 0px !important;
+    background: #F0F4FF !important;
+}
+
+/* ---- DATAFRAME ---- */
+.stDataFrame {
+    border: 3px solid #000000 !important;
+}
+
+/* ---- EXPANDER ---- */
+.streamlit-expanderHeader {
+    background: #F0F4FF !important;
+    border: 2px solid #000000 !important;
+    border-radius: 0px !important;
+    font-weight: 700 !important;
+    font-family: 'Space Grotesk', sans-serif !important;
+}
+
+/* ---- HERO SECTION ---- */
+.hero-section {
+    background: #000000 !important;
+    color: #FFFFFF !important;
+    padding: 3rem 2rem !important;
+    margin-bottom: 2rem !important;
+    border: 3px solid #000000 !important;
+    box-shadow: 8px 8px 0px #0066FF !important;
+}
+
+.hero-title {
+    font-size: 3.5rem !important;
+    font-weight: 800 !important;
+    color: #FFFFFF !important;
+    line-height: 1 !important;
+}
+
+.hero-subtitle {
+    font-size: 1.2rem !important;
+    color: #CCCCCC !important;
+    margin-top: 0.5rem !important;
+    font-weight: 500 !important;
+}
+
+.hero-accent {
+    color: #0066FF !important;
+}
+
+/* ---- FEATURE CARDS ---- */
+.feature-card {
+    border: 3px solid #000000 !important;
+    box-shadow: 5px 5px 0px #0066FF !important;
+    background: #FFFFFF !important;
+    padding: 1.5rem !important;
+    height: 100% !important;
+    transition: all 0.15s ease !important;
+}
+
+.feature-card:hover {
+    box-shadow: 8px 8px 0px #0066FF !important;
+    transform: translate(-2px, -2px) !important;
+}
+
+.feature-icon {
+    font-size: 2.5rem !important;
+    margin-bottom: 0.5rem !important;
+}
+
+.feature-title {
+    font-size: 1.1rem !important;
+    font-weight: 700 !important;
+    color: #000000 !important;
+    margin-bottom: 0.4rem !important;
+}
+
+.feature-desc {
+    font-size: 0.9rem !important;
+    color: #444444 !important;
+    line-height: 1.5 !important;
+}
+
+/* ---- SKILL CHIPS ---- */
+.skill-chip {
+    display: inline-block !important;
+    background: #0066FF !important;
+    color: #FFFFFF !important;
+    padding: 0.2rem 0.8rem !important;
+    font-size: 0.8rem !important;
+    font-weight: 600 !important;
+    border: 2px solid #000000 !important;
+    margin: 0.2rem !important;
+}
+
+.skill-chip-missing {
+    display: inline-block !important;
+    background: #FF3B30 !important;
+    color: #FFFFFF !important;
+    padding: 0.2rem 0.8rem !important;
+    font-size: 0.8rem !important;
+    font-weight: 600 !important;
+    border: 2px solid #000000 !important;
+    margin: 0.2rem !important;
+}
+
+.skill-chip-neutral {
+    display: inline-block !important;
+    background: #F0F4FF !important;
+    color: #000000 !important;
+    padding: 0.2rem 0.8rem !important;
+    font-size: 0.8rem !important;
+    font-weight: 600 !important;
+    border: 2px solid #000000 !important;
+    margin: 0.2rem !important;
+}
+
+/* ---- TIMELINE ---- */
+.timeline-month {
+    border: 3px solid #000000 !important;
+    box-shadow: 5px 5px 0px #0066FF !important;
+    background: #FFFFFF !important;
+    padding: 1.5rem !important;
+    margin-bottom: 1.5rem !important;
+    position: relative !important;
+}
+
+.month-badge {
+    background: #0066FF !important;
+    color: #FFFFFF !important;
+    font-weight: 800 !important;
+    font-size: 1.1rem !important;
+    padding: 0.3rem 1rem !important;
+    border: 2px solid #000000 !important;
+    display: inline-block !important;
+    margin-bottom: 0.8rem !important;
+}
+
+/* ---- INTERVIEW CARDS ---- */
+.question-card {
+    background: #000000 !important;
+    color: #FFFFFF !important;
+    border: 3px solid #0066FF !important;
+    box-shadow: 5px 5px 0px #0066FF !important;
+    padding: 1.5rem !important;
+    margin-bottom: 1rem !important;
+}
+
+.eval-card {
+    border: 3px solid #000000 !important;
+    box-shadow: 5px 5px 0px #00A651 !important;
+    background: #F0FFF6 !important;
+    padding: 1.5rem !important;
+}
+
+/* ---- PROGRESS BAR ---- */
+.progress-bar-outer {
+    background: #E0E0E0 !important;
+    border: 2px solid #000000 !important;
+    height: 20px !important;
+    width: 100% !important;
+}
+
+.progress-bar-inner {
+    background: #0066FF !important;
+    height: 100% !important;
+    transition: width 0.3s ease !important;
+}
+
+/* ---- DIVIDERS ---- */
+hr {
+    border: none !important;
+    border-top: 3px solid #000000 !important;
+    margin: 1.5rem 0 !important;
+}
+
+/* ---- TAG / BADGE ---- */
+.tag {
+    display: inline-block !important;
+    padding: 0.15rem 0.6rem !important;
+    font-size: 0.75rem !important;
+    font-weight: 700 !important;
+    border: 2px solid #000000 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.04em !important;
+}
+
+.tag-blue { background: #0066FF !important; color: #FFFFFF !important; }
+.tag-green { background: #00A651 !important; color: #FFFFFF !important; }
+.tag-red { background: #FF3B30 !important; color: #FFFFFF !important; }
+.tag-orange { background: #FF9500 !important; color: #FFFFFF !important; }
+.tag-black { background: #000000 !important; color: #FFFFFF !important; }
+
+/* ---- FOOTER ---- */
+.app-footer {
+    text-align: center !important;
+    padding: 1.5rem !important;
+    border-top: 3px solid #000000 !important;
+    margin-top: 3rem !important;
+    font-weight: 600 !important;
+    color: #000000 !important;
+}
+
+/* ---- RESPONSIVE ---- */
+@media (max-width: 768px) {
+    h1, .hero-title { font-size: 2.1rem !important; }
+    h2 { font-size: 1.6rem !important; }
+    .brut-card { padding: 1rem !important; }
+    .score-badge { font-size: 1.5rem !important; padding: 0.4rem 1rem !important; }
+    .metric-card .metric-value { font-size: 1.8rem !important; }
+    .stButton > button { font-size: 0.9rem !important; padding: 0.5rem 1rem !important; }
+}
+
+/* ---- PLOTLY CHARTS ---- */
+.js-plotly-plot {
+    border: 3px solid #000000 !important;
+    box-shadow: 4px 4px 0px #000000 !important;
+}
+
+/* ---- SELECTBOX STYLING ---- */
+.stSelectbox [data-baseweb="select"] {
+    border-radius: 0px !important;
+    border: 2px solid #000000 !important;
+}
+
+/* ---- FILE UPLOADER ---- */
+[data-testid="stFileUploader"] {
+    border: 3px dashed #000000 !important;
+    background: #F8F8F8 !important;
+    padding: 1rem !important;
+}
+
+[data-testid="stFileUploader"]:hover {
+    border-color: #0066FF !important;
+    background: #F0F4FF !important;
+}
