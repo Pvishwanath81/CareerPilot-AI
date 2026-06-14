@@ -3,6 +3,8 @@
    ============================================ */
 
 @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700;800&display=swap');
+/* Telugu script rendering — Noto Sans Telugu covers the full Unicode block */
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Telugu:wght@400;600;700&display=swap');
 
 /* ---- BASE ---- */
 *, *::before, *::after {
@@ -10,15 +12,59 @@
 }
 
 html, body, [class*="css"] {
-    font-family: 'Space Grotesk', sans-serif !important;
+    font-family: 'Space Grotesk', 'Noto Sans Telugu', sans-serif !important;
     background-color: #FFFFFF !important;
     color: #000000 !important;
 }
 
-/* ---- HIDE STREAMLIT DEFAULTS ---- */
-#MainMenu { visibility: hidden; }
-footer { visibility: hidden; }
-header { visibility: hidden; }
+/* Telugu script — ensure correct rendering wherever it appears */
+:lang(te),
+.te-text {
+    font-family: 'Noto Sans Telugu', 'Space Grotesk', sans-serif !important;
+    line-height: 1.8 !important;   /* Telugu glyphs are taller; needs extra leading */
+}
+
+/* ---- HIDE STREAMLIT DEFAULTS (without killing the sidebar toggle) ---- */
+#MainMenu                          { visibility: hidden; }
+footer                             { visibility: hidden; }
+[data-testid="stToolbar"]          { visibility: hidden; }
+[data-testid="stDecoration"]       { display: none; }
+[data-testid="stStatusWidget"]     { visibility: hidden; }
+
+/* Header must stay visible so the sidebar ☰ toggle button renders */
+header, [data-testid="stHeader"] {
+    visibility: visible !important;
+    background: transparent !important;
+}
+
+/* EXPAND button (☰) shown in top-left when sidebar is COLLAPSED */
+[data-testid="stExpandSidebarButton"],
+[data-testid="stExpandSidebarButton"] button {
+    visibility: visible !important;
+    display: flex !important;
+    opacity: 1 !important;
+    pointer-events: auto !important;
+}
+[data-testid="stExpandSidebarButton"] button {
+    background: #0066FF !important;
+    border-radius: 6px !important;
+    padding: 6px !important;
+    box-shadow: 2px 2px 8px rgba(0,0,0,0.5) !important;
+}
+[data-testid="stExpandSidebarButton"] button svg {
+    fill: #ffffff !important;
+    color: #ffffff !important;
+    stroke: #ffffff !important;
+}
+
+/* COLLAPSE button shown inside sidebar when it is open */
+[data-testid="stSidebarCollapseButton"],
+[data-testid="stSidebarCollapseButton"] button {
+    visibility: visible !important;
+    display: flex !important;
+    opacity: 1 !important;
+    pointer-events: auto !important;
+}
 
 /* ---- MAIN CONTAINER ---- */
 .main .block-container {
@@ -136,13 +182,14 @@ h3, .h3 {
 /* ---- BUTTONS ---- */
 .stButton > button {
     background: #0066FF !important;
+    pointer-events: auto !important;
     color: #FFFFFF !important;
     border: 3px solid #000000 !important;
     box-shadow: 4px 4px 0px #000000 !important;
     font-weight: 700 !important;
     border-radius: 0px !important;
     padding: 0.6rem 1.4rem !important;
-    font-family: 'Space Grotesk', sans-serif !important;
+    font-family: 'Space Grotesk', 'Noto Sans Telugu', sans-serif !important;
     font-size: 1rem !important;
     transition: all 0.1s ease !important;
     width: auto !important;
@@ -170,7 +217,7 @@ h3, .h3 {
     padding: 0.6rem 1.4rem !important;
     display: inline-block !important;
     cursor: pointer !important;
-    font-family: 'Space Grotesk', sans-serif !important;
+    font-family: 'Space Grotesk', 'Noto Sans Telugu', sans-serif !important;
     font-size: 1rem !important;
     text-decoration: none !important;
     transition: all 0.1s ease !important;
@@ -184,7 +231,7 @@ h3, .h3 {
 
 [data-testid="stSidebar"] * {
     color: #FFFFFF !important;
-    font-family: 'Space Grotesk', sans-serif !important;
+    font-family: 'Space Grotesk', 'Noto Sans Telugu', sans-serif !important;
 }
 
 [data-testid="stSidebar"] .stRadio label {
@@ -223,7 +270,7 @@ h3, .h3 {
 .stDateInput > div > div > input {
     border: 2px solid #000000 !important;
     border-radius: 0px !important;
-    font-family: 'Space Grotesk', sans-serif !important;
+    font-family: 'Space Grotesk', 'Noto Sans Telugu', sans-serif !important;
     font-size: 1rem !important;
     background: #FFFFFF !important;
 }
@@ -237,7 +284,7 @@ h3, .h3 {
 
 /* ---- SLIDER ---- */
 .stSlider > div {
-    font-family: 'Space Grotesk', sans-serif !important;
+    font-family: 'Space Grotesk', 'Noto Sans Telugu', sans-serif !important;
 }
 
 /* ---- ALERTS ---- */
@@ -280,7 +327,7 @@ h3, .h3 {
     border: 2px solid #000000 !important;
     border-radius: 0px !important;
     font-weight: 700 !important;
-    font-family: 'Space Grotesk', sans-serif !important;
+    font-family: 'Space Grotesk', 'Noto Sans Telugu', sans-serif !important;
 }
 
 /* ---- HERO SECTION ---- */
@@ -305,6 +352,7 @@ h3, .h3 {
     color: #CCCCCC !important;
     margin-top: 0.5rem !important;
     font-weight: 500 !important;
+    font-family: 'Space Grotesk', 'Noto Sans Telugu', sans-serif !important;
 }
 
 .hero-accent {
@@ -341,7 +389,8 @@ h3, .h3 {
 .feature-desc {
     font-size: 0.9rem !important;
     color: #444444 !important;
-    line-height: 1.5 !important;
+    line-height: 1.6 !important;
+    font-family: 'Space Grotesk', 'Noto Sans Telugu', sans-serif !important;
 }
 
 /* ---- SKILL CHIPS ---- */

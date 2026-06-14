@@ -3,6 +3,13 @@ CareerPilot AI — Module 1: AI Resume Analyzer
 Upload a PDF resume, extract text, get ATS score, skill gap analysis, and recommendations.
 """
 
+import os as _os, sys as _sys
+_mod_dir = _os.path.dirname(_os.path.abspath(__file__))
+_project_root = _os.path.dirname(_mod_dir)
+if _project_root not in _sys.path:
+    _sys.path.insert(0, _project_root)
+
+
 import streamlit as st
 import PyPDF2
 import plotly.graph_objects as go
@@ -11,44 +18,42 @@ import pandas as pd
 import io
 
 from utils import ai_helpers, db_manager, pdf_generator
+from i18n import t
 
 
 def show_resume_analyzer():
-    st.markdown("""
-    <h1 style='font-size:2.4rem;font-weight:800;'>📄 AI Resume Analyzer</h1>
+    st.markdown(f"""
+    <h1 style='font-size:2.4rem;font-weight:800;'>{t("resume_title")}</h1>
     <p style='font-size:1.1rem;color:#555;margin-bottom:1.5rem;'>
-        Upload your resume PDF for instant ATS scoring, skill gap analysis, and AI-powered recommendations.
+        {t("resume_subtitle")}
     </p>
     """, unsafe_allow_html=True)
 
     # ── File Upload ────────────────────────────────────────────────────────────
     uploaded_file = st.file_uploader(
-        "Drop your resume here (PDF only)",
+        t("resume_upload_label"),
         type=["pdf"],
-        help="Upload a PDF version of your resume for analysis.",
+        help=t("resume_upload_help"),
     )
 
     if uploaded_file is not None:
-        # Extract text from PDF
-        with st.spinner("📖 Reading your resume..."):
+        with st.spinner(t("resume_reading")):
             resume_text = _extract_pdf_text(uploaded_file)
 
         if not resume_text or len(resume_text.strip()) < 50:
-            st.error("⚠️ Could not extract enough text from this PDF. Please ensure it is not a scanned image-only PDF.")
+            st.error(t("resume_error_extract"))
             return
 
-        st.success(f"✅ Resume loaded — {len(resume_text.split())} words extracted")
+        st.success(t("resume_loaded").format(n=len(resume_text.split())))
 
-        with st.expander("📃 Preview extracted text (first 500 chars)"):
+        with st.expander(t("resume_preview_label")):
             st.text(resume_text[:500] + ("..." if len(resume_text) > 500 else ""))
 
-        # ── Analyse ────────────────────────────────────────────────────────────
-        if st.button("🔍 Analyse My Resume", key="btn_analyse_resume"):
+        if st.button(t("resume_analyse_btn"), key="btn_analyse_resume"):
             _run_analysis(resume_text)
 
-    # ── Show cached results ────────────────────────────────────────────────────
     elif st.session_state.get("resume_score", 0) > 0:
-        st.info("💡 Showing your last analysis results. Upload a new resume to re-analyse.")
+        st.info(t("resume_last_result_info"))
         _display_results(st.session_state.get("last_analysis", {}))
 
 
@@ -68,27 +73,25 @@ def _extract_pdf_text(uploaded_file) -> str:
 
 
 def _run_analysis(resume_text: str):
-    """Call Gemini, parse results, display and save."""
-    with st.spinner("🤖 Analysing your resume with AI... (this may take 10-15 seconds)"):
+    """Call AI, parse results, display and save."""
+    with st.spinner(t("resume_analysing")):
         result = ai_helpers.analyze_resume(resume_text)
 
     if "error" in result:
-        st.error(f"❌ AI Analysis failed: {result['error']}")
+        st.error(f"{t('resume_ai_failed')}{result['error']}")
         _show_api_key_hint()
         return
 
-    # Save to session state
     st.session_state["resume_score"] = result.get("resume_score", 0)
     st.session_state["ats_score"] = result.get("ats_score", 0)
     st.session_state["skills_found"] = result.get("skills_found", [])
     st.session_state["skills_missing"] = result.get("missing_skills", [])
     st.session_state["last_analysis"] = result
 
-    # Save to DB
     try:
         db_manager.save_resume_analysis(result)
     except Exception:
-        pass  # Don't block display on DB errors
+        pass
 
     _display_results(result)
 
@@ -108,7 +111,7 @@ def _display_results(result: dict):
     recommendations = result.get("recommendations", [])
 
     st.markdown("---")
-    st.markdown("<h2>📊 Analysis Results</h2>", unsafe_allow_html=True)
+    st.markdown(f"<h2>📊 {t('resume_results_heading')}</h2>", unsafe_allow_html=True)
 
     # ── Score Badges ───────────────────────────────────────────────────────────
     col1, col2, col3 = st.columns(3)
@@ -117,7 +120,7 @@ def _display_results(result: dict):
         st.markdown(f"""
         <div class="metric-card" style="border-color:{badge_color};box-shadow:4px 4px 0px {badge_color};">
             <div class="metric-value" style="color:{badge_color};">{resume_score}/100</div>
-            <div class="metric-label">Resume Score</div>
+            <div class="metric-label">{t("resume_score_label")}</div>
         </div>
         """, unsafe_allow_html=True)
 
@@ -126,7 +129,7 @@ def _display_results(result: dict):
         st.markdown(f"""
         <div class="metric-card" style="border-color:{ats_color};box-shadow:4px 4px 0px {ats_color};">
             <div class="metric-value" style="color:{ats_color};">{ats_score}/100</div>
-            <div class="metric-label">ATS Score</div>
+            <div class="metric-label">{t("resume_ats_label")}</div>
         </div>
         """, unsafe_allow_html=True)
 
@@ -134,7 +137,7 @@ def _display_results(result: dict):
         st.markdown(f"""
         <div class="metric-card">
             <div class="metric-value" style="font-size:1.6rem;">{exp_level}</div>
-            <div class="metric-label">Experience Level</div>
+            <div class="metric-label">{t("resume_exp_label")}</div>
         </div>
         """, unsafe_allow_html=True)
 
@@ -144,12 +147,12 @@ def _display_results(result: dict):
     chart_col1, chart_col2 = st.columns(2)
 
     with chart_col1:
-        # Gauge chart for resume score
         fig_gauge = go.Figure(go.Indicator(
             mode="gauge+number",
             value=resume_score,
             domain={"x": [0, 1], "y": [0, 1]},
-            title={"text": "Resume Score", "font": {"family": "Space Grotesk", "size": 16, "color": "#000000"}},
+            title={"text": t("resume_score_chart_title"),
+                   "font": {"family": "Space Grotesk", "size": 16, "color": "#000000"}},
             gauge={
                 "axis": {"range": [0, 100], "tickcolor": "#000000"},
                 "bar": {"color": "#0066FF", "thickness": 0.3},
@@ -175,15 +178,14 @@ def _display_results(result: dict):
         st.plotly_chart(fig_gauge, use_container_width=True)
 
     with chart_col2:
-        # Skills coverage pie chart
         found_count = len(skills_found)
         missing_count = len(missing_skills)
         if found_count + missing_count > 0:
             fig_pie = px.pie(
                 values=[found_count, missing_count],
-                names=["Skills Found", "Skills Missing"],
+                names=[t("dash_skills_found_label"), t("dash_skills_missing_label")],
                 color_discrete_sequence=["#0066FF", "#FF3B30"],
-                title="Skills Coverage",
+                title=t("resume_skills_coverage"),
             )
             fig_pie.update_traces(
                 textinfo="label+percent",
@@ -197,13 +199,15 @@ def _display_results(result: dict):
             )
             st.plotly_chart(fig_pie, use_container_width=True)
         else:
-            st.info("No skill data to visualise.")
+            st.info(t("dash_skill_coverage_empty"))
 
     # ── Skill Bar Chart ────────────────────────────────────────────────────────
     if skills_found or missing_skills:
+        found_label = t("dash_skills_found_label")
+        missing_label = t("dash_skills_missing_label")
         all_skills = (
-            [(s, "Found", "#0066FF") for s in skills_found[:10]] +
-            [(s, "Missing", "#FF3B30") for s in missing_skills[:10]]
+            [(s, found_label, "#0066FF") for s in skills_found[:10]] +
+            [(s, missing_label, "#FF3B30") for s in missing_skills[:10]]
         )
         df_skills = pd.DataFrame(all_skills, columns=["Skill", "Status", "Color"])
         df_skills["Value"] = 1
@@ -212,8 +216,8 @@ def _display_results(result: dict):
             df_skills,
             x="Value", y="Skill", color="Status",
             orientation="h",
-            title="Skills Overview",
-            color_discrete_map={"Found": "#0066FF", "Missing": "#FF3B30"},
+            title=t("resume_skills_overview"),
+            color_discrete_map={found_label: "#0066FF", missing_label: "#FF3B30"},
         )
         fig_bar.update_layout(
             paper_bgcolor="white", font={"family": "Space Grotesk"},
@@ -230,16 +234,16 @@ def _display_results(result: dict):
     col_a, col_b = st.columns(2)
 
     with col_a:
-        st.markdown("### ✅ Strengths")
+        st.markdown(t("resume_strengths"))
         for s in strengths:
             st.success(s)
 
-        st.markdown("### ⚠️ Weaknesses")
+        st.markdown(t("resume_weaknesses"))
         for w in weaknesses:
             st.warning(w)
 
     with col_b:
-        st.markdown("### ❌ Missing Skills")
+        st.markdown(t("resume_missing_skills"))
         if missing_skills:
             chips_html = "".join(
                 f'<span class="skill-chip-missing">{skill}</span>'
@@ -247,15 +251,15 @@ def _display_results(result: dict):
             )
             st.markdown(f'<div style="line-height:2.2;">{chips_html}</div>', unsafe_allow_html=True)
         else:
-            st.info("No critical missing skills identified.")
+            st.info(t("resume_no_missing"))
 
-        st.markdown("### 💡 Recommendations")
+        st.markdown(t("resume_recommendations"))
         for rec in recommendations:
             st.info(rec)
 
     # ── Detected Skills ────────────────────────────────────────────────────────
     if skills_found:
-        st.markdown("### 🛠️ Skills Detected in Your Resume")
+        st.markdown(t("resume_detected_skills"))
         chips_html = "".join(
             f'<span class="skill-chip">{skill}</span>'
             for skill in skills_found
@@ -268,23 +272,22 @@ def _display_results(result: dict):
     try:
         pdf_bytes = pdf_generator.generate_resume_report(result)
         st.download_button(
-            label="📥 Download Resume Analysis Report (PDF)",
+            label=t("resume_download_btn"),
             data=pdf_bytes,
             file_name=f"resume_analysis_{_today()}.pdf",
             mime="application/pdf",
             key="download_resume_pdf",
         )
     except Exception as e:
-        st.warning(f"PDF generation unavailable: {e}")
+        st.warning(f"{t('resume_pdf_unavailable')}{e}")
 
 
 def _show_api_key_hint():
-    st.markdown("""
+    st.markdown(f"""
     <div class="brut-card" style="border-color:#FF9500;box-shadow:4px 4px 0px #FF9500;">
-        <strong>🔑 API Key Required</strong><br>
-        To use AI features, create a <code>.env</code> file in the project root with:<br>
-        <code>GOOGLE_API_KEY=your_gemini_api_key_here</code><br><br>
-        Get a free API key at <a href="https://aistudio.google.com/app/apikey" target="_blank">Google AI Studio</a>
+        <strong>{t("api_key_required")}</strong><br>
+        {t("api_key_hint_body")}<br><br>
+        {t("api_key_link")} <a href="https://aistudio.google.com/app/apikey" target="_blank">Google AI Studio</a>
     </div>
     """, unsafe_allow_html=True)
 

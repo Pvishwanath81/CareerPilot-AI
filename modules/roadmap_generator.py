@@ -3,11 +3,19 @@ CareerPilot AI — Module 4: Career Roadmap Generator
 AI-powered month-by-month career roadmap for your target role.
 """
 
+import os as _os, sys as _sys
+_mod_dir = _os.path.dirname(_os.path.abspath(__file__))
+_project_root = _os.path.dirname(_mod_dir)
+if _project_root not in _sys.path:
+    _sys.path.insert(0, _project_root)
+
+
 import streamlit as st
 import pandas as pd
 from datetime import date
 
 from utils import ai_helpers, db_manager, pdf_generator
+from i18n import t
 
 CAREER_GOALS = [
     "Software Engineer",
@@ -36,27 +44,27 @@ TIMELINES = {
 
 
 def show_roadmap_generator():
-    st.markdown("""
-    <h1 style='font-size:2.4rem;font-weight:800;'>🎯 Career Roadmap Generator</h1>
+    st.markdown(f"""
+    <h1 style='font-size:2.4rem;font-weight:800;'>{t("roadmap_title")}</h1>
     <p style='font-size:1.1rem;color:#555;margin-bottom:1.5rem;'>
-        Get a personalised, month-by-month roadmap to reach your target career role.
+        {t("roadmap_subtitle")}
     </p>
     """, unsafe_allow_html=True)
 
     # ── Input Form ─────────────────────────────────────────────────────────────
     col1, col2 = st.columns(2)
     with col1:
-        career_goal = st.selectbox("🎯 Target Career Role", CAREER_GOALS)
-        experience = st.selectbox("📊 Current Experience Level", EXPERIENCE_LEVELS)
+        career_goal = st.selectbox(t("roadmap_target_role"), CAREER_GOALS)
+        experience = st.selectbox(t("roadmap_exp_level"), EXPERIENCE_LEVELS)
     with col2:
-        timeline = st.selectbox("📅 Target Timeline", list(TIMELINES.keys()), index=1)
+        timeline = st.selectbox(t("roadmap_timeline"), list(TIMELINES.keys()), index=1)
         current_skills = st.text_area(
-            "🛠️ Your Current Skills (comma-separated)",
-            placeholder="Python, SQL, Excel, Git...",
+            t("roadmap_skills_label"),
+            placeholder=t("roadmap_skills_placeholder"),
             height=100,
         )
 
-    generate_btn = st.button("🚀 Generate My Career Roadmap", key="btn_gen_roadmap", use_container_width=False)
+    generate_btn = st.button(t("roadmap_generate_btn"), key="btn_gen_roadmap")
 
     if generate_btn:
         career_data = {
@@ -67,11 +75,11 @@ def show_roadmap_generator():
             "timeline_months": TIMELINES[timeline],
         }
 
-        with st.spinner(f"🤖 Building your {timeline} {career_goal} roadmap..."):
+        with st.spinner(t("roadmap_generating").format(timeline=timeline, goal=career_goal)):
             result = ai_helpers.generate_roadmap(career_data)
 
         if "error" in result:
-            st.error(f"❌ Roadmap generation failed: {result['error']}")
+            st.error(f"{t('roadmap_ai_failed')}{result['error']}")
             _show_api_key_hint()
             return
 
@@ -95,7 +103,7 @@ def show_roadmap_generator():
 
     elif st.session_state.get("roadmap"):
         meta = st.session_state.get("roadmap_meta", {})
-        st.info("💡 Showing your last roadmap. Change settings above and regenerate.")
+        st.info(t("roadmap_last_info"))
         _display_roadmap(
             st.session_state["roadmap"],
             meta.get("career_goal", ""),
@@ -108,14 +116,14 @@ def _display_roadmap(result: dict, career_goal: str, experience: str, timeline: 
     """Render the roadmap."""
     st.markdown("---")
 
-    # Header
+    # Header banner
     st.markdown(f"""
     <div style="background:#000;color:#fff;padding:1.5rem 2rem;
                 border:3px solid #000;box-shadow:6px 6px 0px #0066FF;margin-bottom:1.5rem;">
         <div style="font-size:0.85rem;font-weight:700;color:#0066FF;text-transform:uppercase;
-                    letter-spacing:0.1em;">Career Roadmap</div>
+                    letter-spacing:0.1em;">{t("roadmap_label")}</div>
         <div style="font-size:2rem;font-weight:800;margin-top:0.3rem;">{career_goal}</div>
-        <div style="color:#ccc;margin-top:0.3rem;">{experience} · {timeline} Plan</div>
+        <div style="color:#ccc;margin-top:0.3rem;">{experience} · {timeline} {t("roadmap_plan_suffix")}</div>
     </div>
     """, unsafe_allow_html=True)
 
@@ -123,7 +131,7 @@ def _display_roadmap(result: dict, career_goal: str, experience: str, timeline: 
 
     # ── Month Cards ────────────────────────────────────────────────────────────
     if months_data:
-        st.markdown("### 📅 Month-by-Month Roadmap")
+        st.markdown(t("roadmap_monthly_heading"))
         for m in months_data:
             month_num = m.get("month", "?")
             title = m.get("title", "")
@@ -133,29 +141,36 @@ def _display_roadmap(result: dict, career_goal: str, experience: str, timeline: 
             certs = m.get("certifications", [])
             milestone = m.get("milestones", "")
 
-            with st.expander(f"📅 Month {month_num} — {title}", expanded=(month_num == 1)):
+            with st.expander(
+                f"📅 {t('roadmap_month_label')} {month_num} — {title}",
+                expanded=(month_num == 1),
+            ):
                 grid_col1, grid_col2 = st.columns(2)
 
                 with grid_col1:
                     if skills:
-                        st.markdown("**🧠 Skills to Learn**")
-                        chips_html = "".join(f'<span class="skill-chip-neutral">{s}</span>' for s in skills)
-                        st.markdown(f'<div style="line-height:2.2;margin-bottom:0.8rem;">{chips_html}</div>',
-                                    unsafe_allow_html=True)
+                        st.markdown(t("roadmap_skills_to_learn"))
+                        chips_html = "".join(
+                            f'<span class="skill-chip-neutral">{s}</span>' for s in skills
+                        )
+                        st.markdown(
+                            f'<div style="line-height:2.2;margin-bottom:0.8rem;">{chips_html}</div>',
+                            unsafe_allow_html=True,
+                        )
 
                     if projects:
-                        st.markdown("**💻 Projects to Build**")
+                        st.markdown(t("roadmap_projects"))
                         for p in projects:
                             st.markdown(f"→ {p}")
 
                 with grid_col2:
                     if courses:
-                        st.markdown("**📖 Courses**")
+                        st.markdown(t("roadmap_courses"))
                         for c in courses:
                             st.markdown(f"• {c}")
 
                     if certs:
-                        st.markdown("**🏆 Certifications**")
+                        st.markdown(t("roadmap_certs"))
                         for cert in certs:
                             st.markdown(f"🎓 {cert}")
 
@@ -163,28 +178,28 @@ def _display_roadmap(result: dict, career_goal: str, experience: str, timeline: 
                     st.markdown(f"""
                     <div style="background:#F0FFF6;border:2px solid #00A651;padding:0.8rem 1rem;
                                 margin-top:0.8rem;box-shadow:3px 3px 0px #00A651;">
-                        <strong>🏁 Milestone:</strong> {milestone}
+                        {t("roadmap_milestone")} {milestone}
                     </div>
                     """, unsafe_allow_html=True)
 
     # ── Job Prep ───────────────────────────────────────────────────────────────
     job_prep = result.get("job_prep", {})
     if job_prep:
-        st.markdown("### 💼 Job Preparation")
+        st.markdown(t("roadmap_job_prep"))
         jp_col1, jp_col2, jp_col3 = st.columns(3)
 
         with jp_col1:
-            st.markdown("**📝 Resume Tips**")
+            st.markdown(t("roadmap_resume_tips"))
             for tip in job_prep.get("resume_tips", []):
                 st.markdown(f"• {tip}")
 
         with jp_col2:
-            st.markdown("**🎤 Interview Topics**")
+            st.markdown(t("roadmap_interview_topics"))
             for topic in job_prep.get("interview_topics", []):
                 st.markdown(f"• {topic}")
 
         with jp_col3:
-            st.markdown("**🌐 Platforms**")
+            st.markdown(t("roadmap_platforms"))
             for platform in job_prep.get("platforms", []):
                 st.markdown(f"""
                 <span style="background:#0066FF;color:#fff;padding:0.2rem 0.7rem;
@@ -195,12 +210,14 @@ def _display_roadmap(result: dict, career_goal: str, experience: str, timeline: 
     # ── Resources Table ────────────────────────────────────────────────────────
     resources = result.get("resources", [])
     if resources:
-        st.markdown("### 📚 Learning Resources")
+        st.markdown(t("roadmap_resources_heading"))
         df_res = pd.DataFrame([{
-            "Resource": r.get("name", ""),
-            "Type": r.get("type", ""),
-            "URL": r.get("url", ""),
-            "Cost": "✅ Free" if r.get("free") else "💰 Paid",
+            t("roadmap_resource_col_name"): r.get("name", ""),
+            t("roadmap_resource_col_type"): r.get("type", ""),
+            t("roadmap_resource_col_url"): r.get("url", ""),
+            t("roadmap_resource_col_cost"): (
+                t("roadmap_resource_free") if r.get("free") else t("roadmap_resource_paid")
+            ),
         } for r in resources])
         st.dataframe(df_res, use_container_width=True, hide_index=True)
 
@@ -215,22 +232,22 @@ def _display_roadmap(result: dict, career_goal: str, experience: str, timeline: 
         }
         pdf_bytes = pdf_generator.generate_roadmap_report(roadmap_for_pdf)
         st.download_button(
-            label="📥 Download Roadmap PDF",
+            label=t("roadmap_download_btn"),
             data=pdf_bytes,
             file_name=f"career_roadmap_{career_goal.replace(' ', '_').lower()}_{_today()}.pdf",
             mime="application/pdf",
             key="download_roadmap_pdf",
         )
     except Exception as e:
-        st.warning(f"PDF generation unavailable: {e}")
+        st.warning(f"{t('roadmap_pdf_unavailable')}{e}")
 
 
 def _show_api_key_hint():
-    st.markdown("""
+    st.markdown(f"""
     <div class="brut-card" style="border-color:#FF9500;box-shadow:4px 4px 0px #FF9500;">
-        <strong>🔑 API Key Required</strong><br>
-        Set <code>GOOGLE_API_KEY</code> in your <code>.env</code> file.<br>
-        Get a free key at <a href="https://aistudio.google.com/app/apikey" target="_blank">Google AI Studio</a>
+        <strong>{t("api_key_required")}</strong><br>
+        {t("api_key_hint_body")}<br><br>
+        {t("api_key_link")} <a href="https://aistudio.google.com/app/apikey" target="_blank">Google AI Studio</a>
     </div>
     """, unsafe_allow_html=True)
 

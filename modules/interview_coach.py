@@ -3,10 +3,18 @@ CareerPilot AI — Module 5: AI Interview Coach
 Practice with AI-generated questions, get evaluated answers, session summary.
 """
 
+import os as _os, sys as _sys
+_mod_dir = _os.path.dirname(_os.path.abspath(__file__))
+_project_root = _os.path.dirname(_mod_dir)
+if _project_root not in _sys.path:
+    _sys.path.insert(0, _project_root)
+
+
 import streamlit as st
 from datetime import date
 
 from utils import ai_helpers, db_manager, pdf_generator
+from i18n import t
 
 ROLES = [
     "Software Engineer",
@@ -26,10 +34,10 @@ QUESTION_TYPES = ["Technical", "HR & Behavioral", "Mixed"]
 
 
 def show_interview_coach():
-    st.markdown("""
-    <h1 style='font-size:2.4rem;font-weight:800;'>🎤 AI Interview Coach</h1>
+    st.markdown(f"""
+    <h1 style='font-size:2.4rem;font-weight:800;'>{t("interview_title")}</h1>
     <p style='font-size:1.1rem;color:#555;margin-bottom:1.5rem;'>
-        Practice real interview questions and get instant AI feedback on your answers.
+        {t("interview_subtitle")}
     </p>
     """, unsafe_allow_html=True)
 
@@ -67,59 +75,59 @@ def show_interview_coach():
 
 def _show_setup():
     """Render the session setup form."""
-    st.markdown("### ⚙️ Configure Your Interview Session")
+    st.markdown(t("interview_configure"))
 
     col1, col2, col3 = st.columns(3)
     with col1:
-        role = st.selectbox("🎯 Target Role", ROLES, key="setup_role")
+        role = st.selectbox(t("interview_target_role"), ROLES, key="setup_role")
     with col2:
-        difficulty = st.selectbox("📊 Difficulty Level", DIFFICULTIES, key="setup_difficulty")
+        difficulty = st.selectbox(t("interview_difficulty"), DIFFICULTIES, key="setup_difficulty")
     with col3:
-        q_type = st.selectbox("❓ Question Type", QUESTION_TYPES, key="setup_qtype")
+        q_type = st.selectbox(t("interview_q_type"), QUESTION_TYPES, key="setup_qtype")
 
     st.markdown("<br>", unsafe_allow_html=True)
 
     # Feature cards
     c1, c2, c3 = st.columns(3)
     with c1:
-        st.markdown("""
+        st.markdown(f"""
         <div class="brut-card" style="text-align:center;">
             <div style="font-size:2rem;">❓</div>
-            <strong>10 Questions</strong><br>
-            <span style="font-size:0.85rem;color:#555;">Tailored to your role and level</span>
+            <strong>{t("interview_feat_10q")}</strong><br>
+            <span style="font-size:0.85rem;color:#555;">{t("interview_feat_10q_desc")}</span>
         </div>
         """, unsafe_allow_html=True)
     with c2:
-        st.markdown("""
+        st.markdown(f"""
         <div class="brut-card" style="text-align:center;">
             <div style="font-size:2rem;">🤖</div>
-            <strong>AI Evaluation</strong><br>
-            <span style="font-size:0.85rem;color:#555;">Scored 0-10 with detailed feedback</span>
+            <strong>{t("interview_feat_ai")}</strong><br>
+            <span style="font-size:0.85rem;color:#555;">{t("interview_feat_ai_desc")}</span>
         </div>
         """, unsafe_allow_html=True)
     with c3:
-        st.markdown("""
+        st.markdown(f"""
         <div class="brut-card" style="text-align:center;">
             <div style="font-size:2rem;">📊</div>
-            <strong>Session Report</strong><br>
-            <span style="font-size:0.85rem;color:#555;">Full breakdown and model answers</span>
+            <strong>{t("interview_feat_report")}</strong><br>
+            <span style="font-size:0.85rem;color:#555;">{t("interview_feat_report_desc")}</span>
         </div>
         """, unsafe_allow_html=True)
 
     st.markdown("<br>", unsafe_allow_html=True)
 
-    if st.button("🚀 Start Interview Session", key="btn_start_interview"):
-        with st.spinner(f"🤖 Preparing {q_type} questions for {role} ({difficulty})..."):
+    if st.button(t("interview_start_btn"), key="btn_start_interview"):
+        with st.spinner(t("interview_preparing").format(qtype=q_type, role=role, difficulty=difficulty)):
             result = ai_helpers.generate_interview_questions(role, difficulty, q_type)
 
         if "error" in result:
-            st.error(f"❌ Failed to load questions: {result['error']}")
+            st.error(f"{t('interview_load_failed')}{result['error']}")
             _show_api_key_hint()
             return
 
         questions = result.get("questions", [])
         if not questions:
-            st.error("No questions returned. Please try again.")
+            st.error(t("interview_no_questions"))
             return
 
         st.session_state["interview_questions"] = questions
@@ -147,16 +155,16 @@ def _show_active_session():
 
     question = questions[current_idx]
     total = len(questions)
-    progress = (current_idx) / total
+    progress = current_idx / total
 
     # ── Progress bar ───────────────────────────────────────────────────────────
     st.markdown(f"""
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.5rem;">
-        <strong>Question {current_idx + 1} of {total}</strong>
-        <span style="font-weight:700;color:#0066FF;">{int(progress*100)}% Complete</span>
+        <strong>{t("interview_question_label").format(n=current_idx + 1, total=total)}</strong>
+        <span style="font-weight:700;color:#0066FF;">{int(progress * 100)}{t("interview_pct_complete")}</span>
     </div>
     <div style="background:#E0E0E0;border:2px solid #000;height:18px;margin-bottom:1.5rem;">
-        <div style="background:#0066FF;height:100%;width:{int(progress*100)}%;transition:width 0.3s;"></div>
+        <div style="background:#0066FF;height:100%;width:{int(progress * 100)}%;transition:width 0.3s;"></div>
     </div>
     """, unsafe_allow_html=True)
 
@@ -179,7 +187,7 @@ def _show_active_session():
     if eval_result and "score" in eval_result:
         _display_evaluation(eval_result)
         st.markdown("<br>", unsafe_allow_html=True)
-        if st.button("➡️ Next Question", key="btn_next_q"):
+        if st.button(t("interview_next_btn"), key="btn_next_q"):
             st.session_state["current_eval"] = None
             st.session_state["interview_current_q"] += 1
             if st.session_state["interview_current_q"] >= total:
@@ -189,23 +197,23 @@ def _show_active_session():
     else:
         # ── Answer input ───────────────────────────────────────────────────────
         user_answer = st.text_area(
-            "✍️ Your Answer",
-            placeholder="Type your answer here...\n\nTip: Be specific, use examples, and structure your answer clearly.",
+            t("interview_answer_label"),
+            placeholder=t("interview_answer_placeholder"),
             height=150,
             key=f"answer_{current_idx}",
         )
 
         btn_col1, btn_col2 = st.columns([1, 4])
         with btn_col1:
-            submit = st.button("✅ Submit Answer", key="btn_submit_answer")
+            submit = st.button(t("interview_submit_btn"), key="btn_submit_answer")
         with btn_col2:
-            skip = st.button("⏭️ Skip Question", key="btn_skip_q")
+            skip = st.button(t("interview_skip_btn"), key="btn_skip_q")
 
         if submit:
             if not user_answer.strip():
-                st.warning("Please write an answer before submitting.")
+                st.warning(t("interview_write_answer"))
                 return
-            with st.spinner("🤖 Evaluating your answer..."):
+            with st.spinner(t("interview_evaluating")):
                 eval_result = ai_helpers.evaluate_answer(
                     question.get("question", ""),
                     user_answer,
@@ -213,7 +221,7 @@ def _show_active_session():
                 )
 
             if "error" in eval_result:
-                st.error(f"Evaluation failed: {eval_result['error']}")
+                st.error(f"{t('interview_eval_failed')}{eval_result['error']}")
                 return
 
             # Store answer + evaluation
@@ -247,7 +255,7 @@ def _show_active_session():
 
     # ── Quit button ────────────────────────────────────────────────────────────
     st.markdown("<br>", unsafe_allow_html=True)
-    if st.button("🛑 End Session Early", key="btn_end_early"):
+    if st.button(t("interview_end_early"), key="btn_end_early"):
         _finalise_session()
         st.rerun()
 
@@ -269,25 +277,25 @@ def _display_evaluation(eval_result: dict):
             <div class="score-badge" style="background:{score_color};font-size:1.5rem;padding:0.4rem 1.2rem;">
                 {score}/10
             </div>
-            <span style="font-weight:700;font-size:1.1rem;">Score</span>
+            <span style="font-weight:700;font-size:1.1rem;">{t("interview_score_label")}</span>
             <span style="background:{confidence_color};color:#fff;padding:0.2rem 0.7rem;
                          font-weight:700;border:2px solid #000;font-size:0.85rem;">
-                Confidence: {confidence}
+                {t("interview_confidence")}{confidence}
             </span>
         </div>
         <div style="margin-bottom:0.8rem;">
-            <strong>📝 Feedback:</strong><br>
+            <strong>{t("interview_feedback_label")}</strong><br>
             <span style="font-size:0.95rem;">{feedback}</span>
         </div>
     </div>
     """, unsafe_allow_html=True)
 
     if model_answer:
-        with st.expander("💡 View Model Answer"):
+        with st.expander(t("interview_model_answer")):
             st.markdown(model_answer)
 
     if key_points_missed:
-        st.markdown("**❌ Key Points Missed:**")
+        st.markdown(t("interview_key_missed"))
         for point in key_points_missed:
             st.markdown(f"• {point}")
 
@@ -345,7 +353,7 @@ def _show_summary():
     <div style="background:#000;color:#fff;padding:2rem;border:3px solid #000;
                 box-shadow:8px 8px 0px #0066FF;margin-bottom:1.5rem;text-align:center;">
         <div style="font-size:1rem;color:#0066FF;font-weight:700;text-transform:uppercase;">
-            Session Complete!
+            {t("interview_session_complete")}
         </div>
         <div style="font-size:2.5rem;font-weight:800;margin-top:0.5rem;">{role}</div>
         <div style="display:flex;justify-content:center;gap:1.5rem;margin-top:1rem;flex-wrap:wrap;">
@@ -356,22 +364,22 @@ def _show_summary():
                 {pct}%
             </div>
             <div class="score-badge" style="background:#0066FF;">
-                Grade: {grade}
+                {t("interview_grade_label")}{grade}
             </div>
         </div>
     </div>
     """, unsafe_allow_html=True)
 
     if pct >= 80:
-        st.success("🎉 **Excellent!** You're well-prepared for this role. Keep it up!")
+        st.success(t("interview_excellent"))
     elif pct >= 60:
-        st.warning("👍 **Good performance!** Review the missed points and practice more.")
+        st.warning(t("interview_good"))
     else:
-        st.error("💪 **Needs improvement.** Study the model answers and practice regularly.")
+        st.error(t("interview_needs_improvement"))
 
     # Per-question breakdown
     if session_data:
-        st.markdown("### 📋 Question-by-Question Breakdown")
+        st.markdown(t("interview_breakdown"))
         for i, qa in enumerate(session_data, 1):
             score = qa.get("score", 0)
             sc = "#00A651" if score >= 7 else ("#FF9500" if score >= 5 else "#FF3B30")
@@ -382,13 +390,13 @@ def _show_summary():
                           padding:0.3rem 1rem;">{score}/10</span>
                 </div>
                 """, unsafe_allow_html=True)
-                st.markdown(f"**Your Answer:** {qa.get('user_answer', 'N/A')}")
-                st.markdown(f"**Feedback:** {qa.get('feedback', '')}")
+                st.markdown(f"{t('interview_your_answer')}{qa.get('user_answer', 'N/A')}")
+                st.markdown(f"{t('interview_feedback_key')}{qa.get('feedback', '')}")
                 if qa.get("model_answer"):
-                    st.markdown(f"**Model Answer:** {qa.get('model_answer', '')}")
+                    st.markdown(f"{t('interview_model_ans_key')}{qa.get('model_answer', '')}")
                 missed = qa.get("key_points_missed", [])
                 if missed:
-                    st.markdown("**Key Points Missed:**")
+                    st.markdown(t("interview_key_missed_key"))
                     for p in missed:
                         st.markdown(f"• {p}")
 
@@ -396,7 +404,7 @@ def _show_summary():
 
     btn_col1, btn_col2 = st.columns(2)
     with btn_col1:
-        if st.button("🔄 Start New Session", key="btn_new_session"):
+        if st.button(t("interview_new_session"), key="btn_new_session"):
             for key in ["interview_session", "interview_questions", "interview_current_q",
                         "interview_active", "interview_done", "current_eval"]:
                 if key in st.session_state:
@@ -415,21 +423,21 @@ def _show_summary():
             }
             pdf_bytes = pdf_generator.generate_interview_report(session_for_pdf)
             st.download_button(
-                label="📥 Download Session Report (PDF)",
+                label=t("interview_download_btn"),
                 data=pdf_bytes,
                 file_name=f"interview_report_{date.today().strftime('%Y%m%d')}.pdf",
                 mime="application/pdf",
                 key="download_interview_pdf",
             )
         except Exception as e:
-            st.warning(f"PDF generation unavailable: {e}")
+            st.warning(f"{t('interview_pdf_unavailable')}{e}")
 
 
 def _show_api_key_hint():
-    st.markdown("""
+    st.markdown(f"""
     <div class="brut-card" style="border-color:#FF9500;box-shadow:4px 4px 0px #FF9500;">
-        <strong>🔑 API Key Required</strong><br>
-        Set <code>GOOGLE_API_KEY</code> in your <code>.env</code> file.<br>
-        Get a free key at <a href="https://aistudio.google.com/app/apikey" target="_blank">Google AI Studio</a>
+        <strong>{t("api_key_required")}</strong><br>
+        {t("api_key_hint_body")}<br><br>
+        {t("api_key_link")} <a href="https://aistudio.google.com/app/apikey" target="_blank">Google AI Studio</a>
     </div>
     """, unsafe_allow_html=True)

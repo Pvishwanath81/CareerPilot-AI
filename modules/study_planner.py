@@ -3,6 +3,13 @@ CareerPilot AI — Module 2: Smart Study Planner
 Enter exams and get a personalised daily/weekly schedule.
 """
 
+import os as _os, sys as _sys
+_mod_dir = _os.path.dirname(_os.path.abspath(__file__))
+_project_root = _os.path.dirname(_mod_dir)
+if _project_root not in _sys.path:
+    _sys.path.insert(0, _project_root)
+
+
 import streamlit as st
 import plotly.express as px
 import plotly.graph_objects as go
@@ -10,55 +17,56 @@ import pandas as pd
 from datetime import date, timedelta
 
 from utils import ai_helpers, db_manager, pdf_generator
+from i18n import t
 
 
 def show_study_planner():
-    st.markdown("""
-    <h1 style='font-size:2.4rem;font-weight:800;'>📚 Smart Study Planner</h1>
+    st.markdown(f"""
+    <h1 style='font-size:2.4rem;font-weight:800;'>{t("study_title")}</h1>
     <p style='font-size:1.1rem;color:#555;margin-bottom:1.5rem;'>
-        Enter your subjects and exam dates — get a personalised AI study schedule in seconds.
+        {t("study_subtitle")}
     </p>
     """, unsafe_allow_html=True)
 
     # ── Input Form ─────────────────────────────────────────────────────────────
     with st.form("study_plan_form"):
-        st.markdown("#### 👤 Student Information")
-        student_name = st.text_input("Your Name", placeholder="e.g. Aisha Sharma")
+        st.markdown(t("study_student_info"))
+        student_name = st.text_input(t("study_name_label"), placeholder=t("study_name_placeholder"))
 
-        st.markdown("#### 📖 Subjects")
+        st.markdown(t("study_subjects_heading"))
         subjects_raw = st.text_area(
-            "Enter subjects (one per line)",
-            placeholder="Mathematics\nPhysics\nComputer Science\nChemistry",
+            t("study_subjects_label"),
+            placeholder=t("study_subjects_placeholder"),
             height=120,
         )
 
-        st.markdown("#### ⏰ Study Preferences")
+        st.markdown(t("study_prefs_heading"))
         col1, col2 = st.columns(2)
         with col1:
-            hours_per_day = st.slider("Available study hours per day", 1, 12, 4)
+            hours_per_day = st.slider(t("study_hours_label"), 1, 12, 4)
         with col2:
-            start_date = st.date_input("Study start date", value=date.today())
+            start_date = st.date_input(t("study_start_label"), value=date.today())
 
-        st.markdown("#### 📅 Exam Dates & Difficulty")
+        st.markdown(t("study_exam_heading"))
         subjects_list = [s.strip() for s in subjects_raw.split("\n") if s.strip()]
 
         subject_configs = []
         if subjects_list:
-            st.markdown("Set difficulty and exam date for each subject:")
+            st.markdown(t("study_exam_config_hint"))
             for subj in subjects_list[:8]:  # Cap at 8
                 c1, c2, c3 = st.columns([3, 2, 2])
                 with c1:
                     st.markdown(f"**{subj}**")
                 with c2:
                     difficulty = st.selectbox(
-                        "Difficulty",
-                        ["Easy", "Medium", "Hard"],
+                        t("study_difficulty_label"),
+                        [t("study_easy"), t("study_medium"), t("study_hard")],
                         key=f"diff_{subj}",
                         index=1,
                     )
                 with c3:
                     exam_date = st.date_input(
-                        "Exam Date",
+                        t("study_exam_date_label"),
                         value=date.today() + timedelta(days=30),
                         key=f"exam_{subj}",
                     )
@@ -68,17 +76,17 @@ def show_study_planner():
                     "exam_date": str(exam_date),
                 })
         else:
-            st.info("Enter subjects above to configure each one.")
+            st.info(t("study_enter_subjects_info"))
 
-        submitted = st.form_submit_button("📅 Generate My Study Plan", use_container_width=True)
+        submitted = st.form_submit_button(t("study_generate_btn"), use_container_width=True)
 
     # ── Generate ───────────────────────────────────────────────────────────────
     if submitted:
         if not student_name.strip():
-            st.error("Please enter your name.")
+            st.error(t("study_name_error"))
             return
         if not subject_configs:
-            st.error("Please enter at least one subject.")
+            st.error(t("study_subject_error"))
             return
 
         student_data = {
@@ -88,11 +96,11 @@ def show_study_planner():
             "start_date": str(start_date),
         }
 
-        with st.spinner("🤖 Generating your personalised study plan..."):
+        with st.spinner(t("study_generating")):
             result = ai_helpers.generate_study_plan(student_data)
 
         if "error" in result:
-            st.error(f"❌ AI failed: {result['error']}")
+            st.error(f"{t('study_ai_failed')}{result['error']}")
             _show_api_key_hint()
             return
 
@@ -110,7 +118,7 @@ def show_study_planner():
         _display_plan(result, subject_configs)
 
     elif st.session_state.get("study_plan"):
-        st.info("💡 Showing your last study plan. Fill in the form above to regenerate.")
+        st.info(t("study_last_plan_info"))
         _display_plan(
             st.session_state["study_plan"],
             st.session_state.get("study_plan_subjects", []),
@@ -120,7 +128,7 @@ def show_study_planner():
 def _display_plan(result: dict, subject_configs: list):
     """Render the study plan."""
     st.markdown("---")
-    st.markdown("<h2>📋 Your Personalised Study Plan</h2>", unsafe_allow_html=True)
+    st.markdown(f"<h2>📋 {t('study_plan_heading')}</h2>", unsafe_allow_html=True)
 
     priority = result.get("priority_ranking", [])
     daily = result.get("daily_schedule", [])
@@ -130,7 +138,7 @@ def _display_plan(result: dict, subject_configs: list):
 
     # ── Priority Ranking ───────────────────────────────────────────────────────
     if priority:
-        st.markdown("### 🎯 Subject Priority Ranking")
+        st.markdown(t("study_priority_heading"))
         df_priority = pd.DataFrame(priority)
         priority_color_map = {"High": "#FF3B30", "Medium": "#FF9500", "Low": "#00A651"}
 
@@ -157,7 +165,7 @@ def _display_plan(result: dict, subject_configs: list):
             if "hours" in df_daily.columns and "subject" in df_daily.columns and "day" in df_daily.columns:
                 fig = px.bar(
                     df_daily, x="day", y="hours", color="subject",
-                    title="Daily Study Hours Distribution",
+                    title=t("study_daily_title"),
                     color_discrete_sequence=px.colors.qualitative.Bold,
                     barmode="stack",
                 )
@@ -177,7 +185,7 @@ def _display_plan(result: dict, subject_configs: list):
             fig_dist = px.pie(
                 values=weights,
                 names=subjects_list,
-                title="Study Time Distribution",
+                title=t("study_time_dist_title"),
                 color_discrete_sequence=["#0066FF", "#FF3B30", "#00A651", "#FF9500", "#9B59B6", "#E67E22"],
             )
             fig_dist.update_traces(
@@ -193,23 +201,23 @@ def _display_plan(result: dict, subject_configs: list):
 
     # ── Daily Schedule Table ───────────────────────────────────────────────────
     if daily:
-        st.markdown("### 📅 Daily Schedule")
+        st.markdown(t("study_daily_heading"))
         df_display = pd.DataFrame(daily)
         df_display.columns = [c.replace("_", " ").title() for c in df_display.columns]
         st.dataframe(df_display, use_container_width=True, hide_index=True)
 
     # ── Weekly Plan ────────────────────────────────────────────────────────────
     if weekly:
-        st.markdown("### 📆 Weekly Plan")
+        st.markdown(t("study_weekly_heading"))
         for week in weekly:
-            with st.expander(f"Week {week.get('week','?')} — {week.get('focus','')}"):
+            with st.expander(f"{t('study_week_label')} {week.get('week','?')} — {week.get('focus','')}"):
                 subjects_str = ", ".join(week.get("subjects", []))
-                st.markdown(f"**📚 Subjects:** {subjects_str}")
-                st.markdown(f"**🎯 Goals:** {week.get('goals','')}")
+                st.markdown(f"**📚 {t('study_subjects_label2')}:** {subjects_str}")
+                st.markdown(f"**🎯 {t('study_goals_label')}:** {week.get('goals','')}")
 
     # ── Revision Plan ──────────────────────────────────────────────────────────
     if revision:
-        st.markdown("### 🔄 Revision Schedule")
+        st.markdown(t("study_revision_heading"))
         df_rev = pd.DataFrame(revision)
         if not df_rev.empty:
             df_rev.columns = [c.replace("_", " ").title() for c in df_rev.columns]
@@ -217,13 +225,13 @@ def _display_plan(result: dict, subject_configs: list):
 
     # ── Tips ───────────────────────────────────────────────────────────────────
     if tips:
-        st.markdown("### 💡 Study Tips")
+        st.markdown(t("study_tips_heading"))
         tip_cols = st.columns(min(len(tips), 3))
         for i, tip in enumerate(tips[:6]):
             with tip_cols[i % len(tip_cols)]:
                 st.markdown(f"""
                 <div class="brut-card" style="min-height:80px;">
-                    <strong>Tip {i+1}</strong><br>
+                    <strong>{t('study_tip_prefix')} {i+1}</strong><br>
                     <span style="font-size:0.9rem;">{tip}</span>
                 </div>
                 """, unsafe_allow_html=True)
@@ -234,22 +242,22 @@ def _display_plan(result: dict, subject_configs: list):
     try:
         pdf_bytes = pdf_generator.generate_study_plan_report(result)
         st.download_button(
-            label="📥 Download Study Plan PDF",
+            label=t("study_download_btn"),
             data=pdf_bytes,
             file_name=f"study_plan_{_today()}.pdf",
             mime="application/pdf",
             key="download_study_plan_pdf",
         )
     except Exception as e:
-        st.warning(f"PDF generation unavailable: {e}")
+        st.warning(f"{t('study_pdf_unavailable')}{e}")
 
 
 def _show_api_key_hint():
-    st.markdown("""
+    st.markdown(f"""
     <div class="brut-card" style="border-color:#FF9500;box-shadow:4px 4px 0px #FF9500;">
-        <strong>🔑 API Key Required</strong><br>
-        Set <code>GOOGLE_API_KEY</code> in your <code>.env</code> file.<br>
-        Get a free key at <a href="https://aistudio.google.com/app/apikey" target="_blank">Google AI Studio</a>
+        <strong>{t("api_key_required")}</strong><br>
+        {t("api_key_hint_body")}<br><br>
+        {t("api_key_link")} <a href="https://aistudio.google.com/app/apikey" target="_blank">Google AI Studio</a>
     </div>
     """, unsafe_allow_html=True)
 
